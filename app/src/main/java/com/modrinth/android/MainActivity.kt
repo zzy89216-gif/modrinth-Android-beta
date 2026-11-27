@@ -3,24 +3,22 @@ package com.modrinth.android
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
-import com.modrinth.android.ui.theme.ModrinthTheme
+import androidx.compose.navigation.NavHostController
+import androidx.compose.navigation.rememberNavHostController
+import com.modrinth.android.ui.navigation.Screen
+import com.modrinth.android.ui.home.HomeScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            ModrinthTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    // TODO: 添加 Navigation
-                }
-            }
+            val navController = rememberNavHostController()
+            
+            // TODO: 完善 NavGraph
+            HomeScreen(
+                onNavigateToSearch = { navController.navigate(Screen.Search.route) },
+                onNavigateToCategories = { navController.navigate(Screen.Categories.route) }
+            )
         }
     }
 }
