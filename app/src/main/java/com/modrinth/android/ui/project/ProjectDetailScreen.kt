@@ -3,6 +3,7 @@ package com.modrinth.android.ui.project
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -15,6 +16,10 @@ fun ProjectDetailScreen(
 ) {
     val project by viewModel.project.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState(initial = false)
+
+    LaunchedEffect(projectId) {
+        viewModel.loadProject(projectId)
+    }
 
     Scaffold(
         topBar = {
