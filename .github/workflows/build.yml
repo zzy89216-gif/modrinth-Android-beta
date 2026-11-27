@@ -31,13 +31,8 @@ jobs:
           build-tools-34.0.0
           platforms-android-34
 
-    - name: Grant execute permission
-      run: chmod +x gradlew
-
     - name: Build Debug APK
-      run: |
-        ./gradlew dependencies
-        ./gradlew assembleDebug --stacktrace
+      run: ./gradlew assembleDebug --stacktrace --no-daemon --info
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
