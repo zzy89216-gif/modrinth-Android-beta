@@ -57,11 +57,15 @@
 | 7 | `ModrinthApiImpl` 缺 `retrofit2.http.Path` 导入 | 已补 |
 | 8 | Hilt 缺 UseCase 绑定（kapt 会报无绑定） | 新增 `AppUseCaseModule` |
 | 9 | Compose + Kotlin 2.0 旧 `composeOptions` 配置 | 改用 `org.jetbrains.kotlin.plugin.compose` |
-| 10 | **data 模块用 `kapt()` 但未应用 kapt 插件**（最近一次报错） | 已补 `org.jetbrains.kotlin.kapt` |
+| 10 | data 模块用 `kapt()` 但未应用 kapt 插件 | 已补 `org.jetbrains.kotlin.kapt` |
+| 11 | **AAPT 资源链接失败：`mipmap/ic_launcher_round` 不存在**（最近一次报错） | 已补 `res/mipmap-anydpi-v26/ic_launcher_round.xml` |
+
+> 进度里程碑：第 11 项失败时构建已执行 42 个任务、通过 Kotlin 编译，进入资源链接阶段，说明配置类错误已基本扫清。
 
 ### 下次操作
 
-1. 打开 GitHub Actions 最新一次运行，确认 #10 修复后是否通过。
+1. 打开 GitHub Actions 最新一次运行，确认 #11 修复后 `Build APK` 是否变绿。
+   - 已通过资源链接的话，后面大概率只剩 Kotlin 源码编译错误（类型/导入）或 Hilt 注解处理错误。
 2. 若仍失败，**用 API 直接读日志**（比网页快）：
    ```bash
    TOKEN=你的token
