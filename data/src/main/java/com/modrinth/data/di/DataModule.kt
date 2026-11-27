@@ -1,6 +1,6 @@
 package com.modrinth.data.di
 
-import com.modrinth.data.api.ModrinthApi
+import com.modrinth.data.api.ModrinthApiImpl
 import com.modrinth.data.repository.ProjectRepositoryImpl
 import com.modrinth.domain.repository.ProjectRepository
 import dagger.Binds
@@ -15,12 +15,12 @@ abstract class DataModule {
     @Module
     companion object {
         @ProvidesBinding
-        fun provideModrinthApi(): ModrinthApi {
+        fun provideModrinthApi(): ModrinthApiImpl {
             return Retrofit.Builder()
                 .baseUrl("https://api.modrinth.com/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
-                .create(ModrinthApi::class.java)
+                .create(ModrinthApiImpl::class.java)
         }
     }
 
