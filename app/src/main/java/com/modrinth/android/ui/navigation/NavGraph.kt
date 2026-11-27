@@ -5,7 +5,7 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import androidx.navigation.compose.navHostController
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.ExperimentalComposeUiApi
+
 import androidx.navigation.NavHost
 import androidx.navigation.compose.composable
 import com.modrinth.android.ui.categories.CategoriesScreen
