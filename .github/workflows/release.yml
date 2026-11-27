@@ -1,0 +1,46 @@
+name: Release
+
+# 打 tag（如 v0.1.0）时构建 Release 版并自动创建 GitHub Release
+# 当前 beta 阶段使用 debug 签名；上线前请配置正式签名密钥 secrets
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Java 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: 'gradle'
+
+    - name: Build Release APK (debug-signed, beta stage)
+      run: |
+        chmod +x gradlew
+        ./gradlew clean assembleRelease --stacktrace
+
+    - name: Rename APK
+      run: |
+        VERSION=${GITHUB_REF_NAME#v}
+        mkdir -p dist
+        cp app/build/outputs/apk/release/app-release-unsigned.apk \
+           "dist/modrinth-android-v${VERSION}-release.apk"
+        sha256sum "dist/modrinth-android-v${VERSION}-release.apk" \
+           > "dist/modrinth-android-v${VERSION}-release.apk.sha256"
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          dist/*.apk
+          dist/*.sha256
+        draft: false
+        prerelease: true
+        generate_release_notes: true

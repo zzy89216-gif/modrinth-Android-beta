@@ -5,16 +5,23 @@ import com.modrinth.data.repository.ProjectRepositoryImpl
 import com.modrinth.domain.repository.ProjectRepository
 import dagger.Binds
 import dagger.Module
-import dagger.provisioning.ProvidesBinding
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Singleton
 
 @Module
+@InstallIn(SingletonComponent::class)
 abstract class DataModule {
 
-    @Module
+    @Binds
+    abstract fun bindProjectRepository(repository: ProjectRepositoryImpl): ProjectRepository
+
     companion object {
-        @ProvidesBinding
+        @Provides
+        @Singleton
         fun provideModrinthApi(): ModrinthApiImpl {
             return Retrofit.Builder()
                 .baseUrl("https://api.modrinth.com/")
@@ -23,7 +30,4 @@ abstract class DataModule {
                 .create(ModrinthApiImpl::class.java)
         }
     }
-
-    @Binds
-    abstract fun bindProjectRepository(repository: ProjectRepositoryImpl): ProjectRepository
 }

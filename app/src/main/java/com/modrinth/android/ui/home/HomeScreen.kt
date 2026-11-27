@@ -16,11 +16,8 @@ fun HomeScreen(
             TopAppBar(
                 title = { Text("Modrinth") },
                 actions = {
-                    IconButton(onClick = onNavigateToSearch) {
-                        Icon(
-                            androidx.compose.material.icons.Icons.Default.Search,
-                            contentDescription = "Search"
-                        )
+                    TextButton(onClick = onNavigateToSearch) {
+                        Text("搜索")
                     }
                 }
             )
@@ -36,9 +33,9 @@ fun HomeScreen(
                 text = "欢迎使用 Modrinth Android",
                 style = MaterialTheme.typography.headlineMedium
             )
-            
+
             Spacer(modifier = Modifier.height(24.dp))
-            
+
             Button(onClick = onNavigateToCategories) {
                 Text("浏览分类")
             }

@@ -2,6 +2,7 @@ package com.modrinth.data.api
 
 import com.modrinth.data.api.model.ProjectResponse
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ModrinthApiImpl {

@@ -1,13 +1,12 @@
 package com.modrinth.android.ui.navigation
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
-import androidx.navigation.navArgument
-import androidx.navigation.compose.navHostController
-import androidx.compose.runtime.Composable
-
-import androidx.navigation.NavHost
+import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.navArgument
 import com.modrinth.android.ui.categories.CategoriesScreen
 import com.modrinth.android.ui.home.HomeScreen
 import com.modrinth.android.ui.project.ProjectDetailScreen

@@ -17,6 +17,7 @@ fun SearchScreen(
     var query by remember { mutableStateOf("") }
     val projects by viewModel.projects.collectAsState(initial = emptyList())
     val isLoading by viewModel.isLoading.collectAsState(initial = false)
+    val error by viewModel.error.collectAsState(initial = null)
 
     Scaffold(
         topBar = {
@@ -37,6 +38,25 @@ fun SearchScreen(
                 label = { Text("搜索...") },
                 modifier = Modifier.fillMaxWidth()
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = { viewModel.search(query) },
+                enabled = query.isNotBlank() && !isLoading,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("搜索")
+            }
+
+            if (error != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = error,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
