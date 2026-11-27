@@ -6,8 +6,10 @@
 
 **仓库**: https://github.com/zzy89216-gif/modrinth-Android-beta
 **CI/CD**: https://github.com/zzy89216-gif/modrinth-Android-beta/actions
+**交接文档**: [HANDOFF.md](HANDOFF.md)
 
-> ⚠️ 超早期阶段：功能骨架已搭好，核心 API 联调、下载、账户功能尚未实现。
+> ⚠️ 超早期阶段：功能骨架已搭好，云端 APK 构建仍在调试；核心 API 联调、下载、账户功能尚未实现。
+> 当前卡点与下一步计划见 [HANDOFF.md](HANDOFF.md)。
 
 ---
 
