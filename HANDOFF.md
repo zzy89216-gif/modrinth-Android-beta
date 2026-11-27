@@ -10,11 +10,19 @@
 | 项目 | 状态 |
 |------|------|
 | 代码骨架 | ✅ 完成（4 模块 + 4 页面 + API 封装 + Hilt + Navigation） |
-| 文档体系 | ✅ 完成（8 份文档） |
+| 文档体系 | ✅ 完成（9 份文档，含本文） |
 | CI 工作流 | ✅ 已拆分 3 个（build / pr-check / release） |
-| **云端构建 APK** | ❌ **尚未成功**（当前主要卡点） |
+| **云端构建 APK** | 🔄 修到 kapt 阶段（12 个问题已修，最新修复待验证） |
 | 真机运行验证 | ⏳ 未开始 |
 | 上游代码对齐 | ⏳ 已克隆，未开始对照 |
+
+### 本次会话完成的事
+
+1. 修正项目定位认知：上游是 Rust + TS monorepo，本项目是**基于 API 的原生重写**
+2. 全量克隆上游：`/root/workspace/upstream/modrinth-code`（1GB）、`modrinth-docs`
+3. 云端构建从「17 秒秒挂」推进到「62 个任务后卡在 kapt」，连续修掉 12 个问题
+4. 建立 API 直读 CI 日志的方法（见下文第三节），不再靠网页翻日志
+5. CI 拆成 3 个工作流；议题模板统一；9 份文档全部重写完善
 
 仓库：https://github.com/zzy89216-gif/modrinth-Android-beta
 
@@ -58,15 +66,22 @@
 | 8 | Hilt 缺 UseCase 绑定（kapt 会报无绑定） | 新增 `AppUseCaseModule` |
 | 9 | Compose + Kotlin 2.0 旧 `composeOptions` 配置 | 改用 `org.jetbrains.kotlin.plugin.compose` |
 | 10 | data 模块用 `kapt()` 但未应用 kapt 插件 | 已补 `org.jetbrains.kotlin.kapt` |
-| 11 | **AAPT 资源链接失败：`mipmap/ic_launcher_round` 不存在**（最近一次报错） | 已补 `res/mipmap-anydpi-v26/ic_launcher_round.xml` |
+| 11 | AAPT 资源链接失败：`mipmap/ic_launcher_round` 不存在 | 已补 `res/mipmap-anydpi-v26/ic_launcher_round.xml` |
+| 12 | **kapt 报 `NonExistentClass cannot be converted to Annotation`**（`ModrinthApi.java`） | 残留的废弃重复接口 `ModrinthApi.kt` 用了 `@Path` 却未导入，已删除；Repository 实际用 `ModrinthApiImpl` |
 
-> 进度里程碑：第 11 项失败时构建已执行 42 个任务、通过 Kotlin 编译，进入资源链接阶段，说明配置类错误已基本扫清。
+> 进度里程碑：第 12 项时构建已执行 62 个任务、通过 Kotlin 编译和资源链接，进入注解处理阶段，配置类与资源类错误已基本扫清。
+> **本次会话结束时状态：第 12 项修复已推送（8e1c3fa），尚未确认构建结果 —— 下次第一件事就是看这次构建是否变绿。**
 
 ### 下次操作
 
-1. 打开 GitHub Actions 最新一次运行，确认 #11 修复后 `Build APK` 是否变绿。
-   - 已通过资源链接的话，后面大概率只剩 Kotlin 源码编译错误（类型/导入）或 Hilt 注解处理错误。
-2. 若仍失败，**用 API 直接读日志**（比网页快）：
+1. 打开 GitHub Actions 最新一次运行（commit `8e1c3fa` 触发的），确认 `Build APK` 是否变绿。
+   - 若绿：底部下载 artifact `modrinth-android-debug` → 解压得到 `app-debug.apk` → 装手机。
+   - 若仍红：继续用下面命令读日志，按 `What went wrong` 逐条修。
+2. 常见后续错误预判：
+   - kapt/Hilt 注解处理错误（绑定缺失、`@InstallIn` 遗漏）
+   - Kotlin 类型错误（`@Composable` 参数、StateFlow 类型推断）
+   - 清单/资源引用（`@string`、`@style`、`@mipmap` 未定义）
+3. **用 API 直接读日志**（比网页快）：
    ```bash
    TOKEN=你的token
    RUN_ID=$(curl -s -H "Authorization: token $TOKEN" \
@@ -77,7 +92,6 @@
      -o /tmp/logs.zip && cd /tmp && unzip -o logs.zip && \
      sed -n '/What went wrong/,/Try:/p' build/*.txt
    ```
-3. 预计后续剩余错误类型：Kotlin 源码编译错误（类型/导入）、AAPT2 资源错误（图标/主题引用）、Hilt 注解处理错误。
 
 ---
 
