@@ -1,0 +1,58 @@
+name: 🐛 Bug 报告 / Bug Report
+description: 报告 App 崩溃、功能异常或界面问题
+title: "[BUG] "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > 请尽量填写以下信息，便于快速定位问题。
+  - type: input
+    id: app-version
+    label: App 版本
+    description: 出问题时的版本号（设置页或 About 页可见），如 1.0.0-beta
+    required: true
+  - type: input
+    id: device
+    label: 设备 / 系统版本
+    description: 如：Pixel 8 / Android 15
+    required: true
+  - type: dropdown
+    id: area
+    label: 问题所属模块
+    options:
+      - 启动 / 闪退
+      - 首页 (Home)
+      - 搜索
+      - 模组详情
+      - 分类
+      - 网络 / 请求
+      - 其他
+    required: true
+  - type: textarea
+    id: description
+    label: 问题描述
+    description: 发生了什么，期望的正确行为是什么
+    required: true
+  - type: textarea
+    id: steps
+    label: 复现步骤
+    placeholder: |
+      1. 打开 App
+      2. 点击搜索
+      3. 输入 "optifine"
+      4. 看到白屏
+    required: true
+  - type: textarea
+    id: log
+    label: 日志 / 截图（可选）
+    description: Logcat 片段或截图链接；闪退请提供崩溃堆栈
+    render: text
+  - type: dropdown
+    id: frequency
+    label: 出现频率
+    options:
+      - 每次都出现
+      - 偶尔出现
+      - 只出现一次
+    required: false

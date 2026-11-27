@@ -1,0 +1,12 @@
+# Issue 模板全局配置
+# 普通用户在网页上只能从下方模板中选择，不能建空白 issue
+# 开发者 / 维护者可以用命令行绕过：gh issue create（或 GitHub API）
+blank_issues_enabled: false
+
+contact_links:
+  - name: 🛠 开发任务（仅维护者）
+    url: https://github.com/zzy89216-gif/modrinth-Android-beta/blob/main/ISSUE_TEMPLATE.md
+    about: 项目内部工作规划与任务清单，由维护者维护，外部用户请选下方模板
+  - name: ❓ 使用问题 / 讨论
+    url: https://github.com/zzy89216-gif/modrinth-Android-beta/discussions
+    about: 非 bug、非建议的问题，欢迎在 Discussions 讨论
