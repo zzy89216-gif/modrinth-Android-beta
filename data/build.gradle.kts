@@ -34,8 +34,8 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
     // Hilt
-    implementation("com.google.dagger:hilt-android:2.53.1")
-    kapt("com.google.dagger:hilt-compiler:2.53.1")
+    implementation("com.google.dagger:hilt-android:2.56.2")
+    kapt("com.google.dagger:hilt-compiler:2.56.2")
 
     // Room（离线收藏 / 下载记录）
     implementation("androidx.room:room-runtime:2.6.1")
