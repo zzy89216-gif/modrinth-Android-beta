@@ -49,10 +49,11 @@ fun SearchScreen(
                 Text("搜索")
             }
 
-            if (error != null) {
+            val errorMsg = error
+            if (errorMsg != null) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = error,
+                    text = errorMsg,
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall
                 )
