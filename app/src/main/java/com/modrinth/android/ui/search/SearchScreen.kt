@@ -1,100 +1,159 @@
 package com.modrinth.android.ui.search
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.modrinth.domain.model.Project
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.modrinth.android.ui.home.SearchProjectCard
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
+    initialQuery: String = "",
+    onBack: () -> Unit,
+    onProjectClick: (String) -> Unit,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
-    var query by remember { mutableStateOf("") }
-    val projects by viewModel.projects.collectAsState(initial = emptyList())
-    val isLoading by viewModel.isLoading.collectAsState(initial = false)
-    val error by viewModel.error.collectAsState(initial = null)
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val imageLoader = viewModel.imageLoader
+
+    // 首次带查询词进入时自动执行搜索
+    LaunchedEffect(Unit) {
+        if (initialQuery.isNotBlank()) viewModel.onInitialQuery(initialQuery)
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("搜索模组") }
+                title = {
+                    OutlinedTextField(
+                        value = state.query,
+                        onValueChange = viewModel::onQueryChange,
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("搜索模组…") },
+                        leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                        trailingIcon = {
+                            if (state.query.isNotEmpty()) {
+                                IconButton(onClick = { viewModel.onQueryChange("") }) {
+                                    Icon(Icons.Filled.Close, contentDescription = "清除")
+                                }
+                            }
+                        },
+                        shape = RoundedCornerShape(24.dp),
+                        singleLine = true
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp)
-        ) {
-            TextField(
-                value = query,
-                onValueChange = { query = it },
-                label = { Text("搜索...") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = { viewModel.search(query) },
-                enabled = query.isNotBlank() && !isLoading,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("搜索")
+    ) { padding ->
+        val content = when (val p = state.phase) {
+            SearchPhase.Idle -> {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        "输入关键词搜索 Modrinth 模组",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
-
-            val errorMsg = error
-            if (errorMsg != null) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = errorMsg,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall
-                )
+            SearchPhase.Loading -> {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (isLoading) {
-                CircularProgressIndicator()
-            } else {
-                LazyColumn {
-                    items(projects) { project ->
-                        ProjectItem(project = project)
+            is SearchPhase.Error -> {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(p.message, color = MaterialTheme.colorScheme.error)
+                }
+            }
+            is SearchPhase.Done -> {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        start = 12.dp, end = 12.dp, top = 8.dp, bottom = 24.dp
+                    )
+                ) {
+                    items(p.items, key = { it.projectId }) { item ->
+                        SearchProjectCard(
+                            project = item,
+                            imageLoader = imageLoader,
+                            onClick = { onProjectClick(item.projectId) }
+                        )
+                    }
+                    if (p.hasMore && state.query.isNotBlank()) {
+                        item {
+                            Box(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(64.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(Modifier.height(28.dp).width(28.dp))
+                            }
+                        }
+                    }
+                    if (p.items.isEmpty()) {
+                        item {
+                            Box(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(160.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    "没找到「${state.query}」相关模组",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun ProjectItem(project: Project) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = project.title,
-                style = MaterialTheme.typography.titleMedium
-            )
-            Text(
-                text = project.description.take(100) + "...",
-                style = MaterialTheme.typography.bodySmall
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "下载量: ${project.downloads}",
-                style = MaterialTheme.typography.labelSmall
-            )
+        Box(Modifier.padding(padding).fillMaxSize()) {
+            content
         }
     }
 }

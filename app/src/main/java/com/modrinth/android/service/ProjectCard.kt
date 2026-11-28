@@ -73,7 +73,7 @@ fun ProjectCard(
         ) {
             // 图标：固定 48dp，Coil 按此尺寸解码；memoryCache 命中后滚动零解码
             AsyncImage(
-                model = project.logoUrl,
+                model = project.iconUrl,
                 contentDescription = null,
                 imageLoader = imageLoader,
                 modifier = Modifier

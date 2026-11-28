@@ -2,33 +2,43 @@ package com.modrinth.android.ui.categories
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.modrinth.domain.repository.ProjectRepository
+import com.modrinth.domain.model.Category
+import com.modrinth.domain.usecase.GetCategoriesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+
+data class CategoriesUiState(
+    val loading: Boolean = true,
+    val error: String? = null,
+    val categories: List<Category> = emptyList()
+)
 
 @HiltViewModel
 class CategoriesViewModel @Inject constructor(
-    private val repository: ProjectRepository
+    private val getCategories: GetCategoriesUseCase
 ) : ViewModel() {
 
-    private val _categories = MutableStateFlow<List<String>>(emptyList())
-    val categories: StateFlow<List<String>> = _categories
-
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading
+    private val _state = MutableStateFlow(CategoriesUiState())
+    val state: StateFlow<CategoriesUiState> = _state.asStateFlow()
 
     init {
-        loadCategories()
+        load()
     }
 
-    private fun loadCategories() {
+    fun load() {
+        _state.update { it.copy(loading = true, error = null) }
         viewModelScope.launch {
-            _isLoading.value = true
-            _categories.value = repository.getCategories()
-            _isLoading.value = false
+            try {
+                val list = getCategories.execute()
+                _state.update { it.copy(loading = false, categories = list) }
+            } catch (e: Exception) {
+                _state.update { it.copy(loading = false, error = e.message ?: "加载分类失败") }
+            }
         }
     }
 }

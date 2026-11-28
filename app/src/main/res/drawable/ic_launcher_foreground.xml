@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ModBox 启动图标前景：等距立方体盒子（仅占 108dp 画布中央 66% 安全区）。
-  - 顶面 #8B7CF0（亮紫）
-  - 正面（左）#6C5CE7（主紫）
-  - 侧面（右）#4A3FBF（深紫）
-  - 正面中央白色手绘 M（矢量 path，跟随等距透视的平行四边形轮廓）
+  Modrinth 官方风格标志（第三方客户端使用，品牌归属 Modrinth）：
+  绿色分段圆环（4 个对角缺口）+ 中央扳手（倾斜 30°）。
+  官方品牌色 #00AF5E。108dp 视口，内容落在中央安全区。
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
@@ -12,23 +10,45 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- 顶面 -->
+    <!-- 圆环：4 段弧，半径 26，环宽 7，缺口在 45°/135°/225°/315° 对角线 -->
     <path
-        android:fillColor="#8B7CF0"
-        android:pathData="M54,26 L76,39 L54,52 L32,39 Z" />
+        android:pathData="M 65.8 30.8 A 26 26 0 0 0 42.2 30.8"
+        android:strokeColor="#00AF5E"
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
+    <path
+        android:pathData="M 30.8 42.2 A 26 26 0 0 0 30.8 65.8"
+        android:strokeColor="#00AF5E"
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
+    <path
+        android:pathData="M 42.2 77.2 A 26 26 0 0 0 65.8 77.2"
+        android:strokeColor="#00AF5E"
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
+    <path
+        android:pathData="M 77.2 65.8 A 26 26 0 0 0 77.2 42.2"
+        android:strokeColor="#00AF5E"
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
 
-    <!-- 侧面（右，深紫） -->
-    <path
-        android:fillColor="#4A3FBF"
-        android:pathData="M76,39 L54,52 L54,78 L76,65 Z" />
-
-    <!-- 正面（左，主紫） -->
-    <path
-        android:fillColor="#6C5CE7"
-        android:pathData="M32,39 L54,52 L54,78 L32,65 Z" />
-
-    <!-- 白色 M：按正面等距平面 (32,39)->(54,52)->(54,78)->(32,65) 透视映射 -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M34.64,44.46 L38.6,46.8 L43,67.6 L47.4,52 L51.36,54.34 L51.36,76.44 L34.64,66.56 Z" />
+    <!-- 扳手（垂直绘制后整体旋转 30°，开口朝上偏右） -->
+    <group
+        android:name="wrench"
+        android:rotation="30"
+        android:pivotX="54"
+        android:pivotY="54">
+        <!-- 头部：圆环 + 顶部开口（U 形夹口） -->
+        <path
+            android:pathData="M 49 34.2 A 11 11 0 1 0 59 34.2 L 59 44 L 49 44 Z"
+            android:fillColor="#00AF5E" />
+        <!-- 手柄：向下延伸，底部圆角 -->
+        <path
+            android:pathData="M 50 44 L 50 68 Q 50 72 54 72 Q 58 72 58 68 L 58 44 Z"
+            android:fillColor="#00AF5E" />
+    </group>
 </vector>

@@ -1,7 +1,10 @@
 package com.modrinth.android.di
 
 import com.modrinth.domain.repository.ProjectRepository
+import com.modrinth.domain.usecase.GetCategoriesUseCase
+import com.modrinth.domain.usecase.GetFileDownloadUrlUseCase
 import com.modrinth.domain.usecase.GetProjectUseCase
+import com.modrinth.domain.usecase.GetProjectVersionsUseCase
 import com.modrinth.domain.usecase.SearchProjectsUseCase
 import dagger.Module
 import dagger.Provides
@@ -22,4 +25,19 @@ object AppUseCaseModule {
     @Singleton
     fun provideSearchProjectsUseCase(repository: ProjectRepository): SearchProjectsUseCase =
         SearchProjectsUseCase(repository)
+
+    @Provides
+    @Singleton
+    fun provideGetProjectVersionsUseCase(repository: ProjectRepository): GetProjectVersionsUseCase =
+        GetProjectVersionsUseCase(repository)
+
+    @Provides
+    @Singleton
+    fun provideGetCategoriesUseCase(repository: ProjectRepository): GetCategoriesUseCase =
+        GetCategoriesUseCase(repository)
+
+    @Provides
+    @Singleton
+    fun provideGetFileDownloadUrlUseCase(repository: ProjectRepository): GetFileDownloadUrlUseCase =
+        GetFileDownloadUrlUseCase(repository)
 }

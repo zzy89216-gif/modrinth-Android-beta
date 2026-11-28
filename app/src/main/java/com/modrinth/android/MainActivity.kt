@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.navigation.compose.rememberNavController
 import com.modrinth.android.ui.navigation.AppNavGraph
-import com.modrinth.android.ui.theme.ModrinthTheme
+import com.modrinth.android.ui.theme.ModBoxTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
         requestNotificationPermission()
         enableEdgeToEdge()
         setContent {
-            ModrinthTheme {
+            ModBoxTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
