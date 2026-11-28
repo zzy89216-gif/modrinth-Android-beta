@@ -1,0 +1,71 @@
+NOTICE
+
+ModBox (modrinth-Android-beta)
+
+本仓库包含从 Zalith Launcher 2（以下简称 "zl2"）移植的代码。
+
+源项目：
+  名称：Zalith Launcher 2
+  仓库：https://github.com/ZalithLauncher/ZalithLauncher2
+  许可：GNU General Public License v3.0 或更高版本（见源仓库 LICENSE）
+  原作者：MovTery <movtery228@qq.com> 及贡献者（Copyright (C) 2025-2026）
+
+依据 GPLv3，本修改版保留原项目 GPL-3.0 条款；本仓库以本仓库根目录 LICENSE
+（MIT，仅约束 ModBox 自身代码）与以下声明并存。移植自 zl2 的文件仍以
+GPL-3.0 许可分发，修改版须按 GPL 第七条附加条款处理（见源 README）。
+
+移植文件清单（每个文件头均有 "Ported from ZalithLauncher2 (GPL-3.0), see NOTICE" 注释）：
+
+1) 键位映射（源：zl2 InputMap 模块 + ZalithLauncher 主 app 键位 UI）
+   目标包 com.modrinth.android.keymap：
+   - app/src/main/java/com/modrinth/android/keymap/GlKeycodes.kt
+     源自 InputMap/src/main/java/com/movtery/inputmap/keycodes/LwjglGlfwKeycode.java
+     （GLFW 3.4 键码常量，zlib 许可，见该文件内注）
+   - app/src/main/java/com/modrinth/android/keymap/GlKeyNames.kt
+     源自 InputMap/src/main/java/com/movtery/inputmap/keycodes/ControlEventKeyName.java
+   - app/src/main/java/com/modrinth/android/keymap/KeymapConfig.kt
+     默认键位源自 InputMap/src/main/java/com/movtery/inputmap/keycodes/_MinecraftKeyBindingMapper.kt
+   - app/src/main/java/com/modrinth/android/keymap/AndroidKeyMapper.kt
+     映射关系参照 ZalithLauncher/src/main/java/com/movtery/zalithlauncher/game/input/EfficientAndroidLWJGLKeycode.java
+     （该类本身修改自 PojavLauncher，GPL-3.0）
+   - app/src/main/java/com/modrinth/android/keymap/KeymapRepository.kt
+   - app/src/main/java/com/modrinth/android/keymap/KeymapViewModel.kt
+   - app/src/main/java/com/modrinth/android/keymap/KeymapScreen.kt
+     UI 源自 ZalithLauncher/src/main/java/com/movtery/zalithlauncher/ui/control/Keyboard.kt 与
+     ZalithLauncher/src/main/java/com/movtery/zalithlauncher/ui/screens/main/control_editor/edit_widget/KeyEventEdit.kt
+
+2) 卡片网格组件（源：zl2 CardGrid 模块，GPL-3.0，纯 Compose）
+   目标包 com.modrinth.android.ui.components.cardgrid（11 个文件，与源文件一一对应）：
+   - engine/GridEngine.kt
+   - model/CardLimits.kt
+   - model/CardRect.kt
+   - model/CardSizeClass.kt
+   - model/CardState.kt
+   - model/CardType.kt
+   - model/GridGeometry.kt
+   - model/ResizeEdge.kt
+   - state/CardGridState.kt
+   - ui/CardGrid.kt
+   - ui/CardGridAutoScroll.kt
+   适配说明：ui/CardGrid.kt 移除了对 Material Expressive `motionScheme` 的依赖
+   （ModBox 当前 Compose BOM 2024.09.00 尚不可用），改用内置弹簧动画参数。
+
+3) 颜色选择器组件（源：zl2 ColorPicker 模块，GPL-3.0，纯 Compose）
+   目标包 com.modrinth.android.ui.components.colorpicker（9 个文件，与源文件一一对应）：
+   - Controller.kt
+   - Utils.kt
+   - components/ColorPicker.kt
+   - components/AlphaPicker.kt
+   - components/HuePicker.kt
+   - components/_Gestures.kt
+   - components/_Indicator.kt
+   - components/_Share.kt
+   - components/_Transparent.kt
+
+未移植（native / 与游戏进程绑定，详见 docs/zl2调研.md）：
+   - zl2 LWJGL 模块、bridge/、jni/（含 egl_bridge.c 等）、内嵌 JRE
+   - zl2 LayerController 的运行时控件（依赖游戏进程）
+
+原始版权与许可文本：
+   以源仓库 https://github.com/ZalithLauncher/ZalithLauncher2 的 LICENSE（GPL-3.0）
+   及各源文件内保留的版权头为准。

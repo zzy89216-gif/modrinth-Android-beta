@@ -1,11 +1,34 @@
 name: Release
 
-# 打 tag（如 v0.1.0）时构建 Release 版并自动创建 GitHub Release
-# 当前 beta 阶段使用 debug 签名；上线前请配置正式签名密钥 secrets
+# =====================================================================
+# 发布流程（beta 阶段）
+# 触发：推送 tag（如 v0.1.0）
+# 产物：arm64-v8a 单架构 Release APK + sha256sums.txt，自动创建 GitHub Release
+#
+# beta 签名方案：workflow 运行时用 keytool 临时生成 keystore（随机密码，
+# 仅存在于 runner 上，运行结束即销毁），并通过 -D 属性传给 Gradle。
+# 同时用 build-tools 的 apksigner 对 assembleRelease 产出的
+# app-release-unsigned.apk 做 v1/v2 签名，保证产物可直接安装。
+# ** 禁止把任何私钥 / keystore 文件写入仓库 **
+#
+# 正式发布需要的 GitHub Secrets 清单（beta 阶段可全部不配）：
+#   RELEASE_KEYSTORE_BASE64  keystore 文件内容的 base64 编码
+#                            （action 里 base64 -d 还原后再签名）
+#   KEYSTORE_PASS            keystore 密码
+#   KEY_ALIAS                key 别名
+#   KEY_PASS                 key 密码
+# 正式签名接入方式：把「生成临时 keystore」一步替换为
+#   echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 -d > release.keystore
+# 并把 -D / apksigner 的密码与别名换成上述 Secrets。
+# =====================================================================
+
 on:
   push:
     tags:
       - 'v*'
+
+permissions:
+  contents: write
 
 jobs:
   release:
@@ -21,26 +44,102 @@ jobs:
         distribution: 'temurin'
         cache: 'gradle'
 
-    - name: Build Release APK (debug-signed, beta stage)
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        licenses: |
+          android-sdk-license
+          android-sdk-preview-license
+
+    - name: Install build-tools (apksigner)
+      run: sdkmanager "build-tools;34.0.0"
+
+    - name: Generate temporary keystore (beta stage)
+      # beta 临时签名：随机密码只写在 runner 临时文件里，绝不提交进仓库。
+      # 正式发布前：删除本步骤，改用 GitHub Secrets 里的用户 keystore。
+      run: |
+        KEYSTORE=beta-release.keystore
+        echo "beta-store-$(openssl rand -hex 16)" > ks.pass
+        echo "beta-key-$(openssl rand -hex 16)"  > key.pass
+        keytool -genkeypair -v \
+          -keystore "$KEYSTORE" \
+          -storepass "$(cat ks.pass)" \
+          -keypass "$(cat key.pass)" \
+          -alias modbox \
+          -keyalg RSA -keysize 2048 -validity 10950 \
+          -dname "CN=ModBox Beta, OU=CI, O=ModBox, L=Internet, C=CN"
+        # 只打印指纹用于排查，不打印密码
+        keytool -list -keystore "$KEYSTORE" -storepass "$(cat ks.pass)" | grep -E "Alias|SHA256" || true
+
+    - name: Build Release APK (beta temporary signing)
+      # beta 临时签名：keystore 由上一步生成，通过 -D 属性传给 Gradle
+      # （Gradle 侧 signingConfigs 尚未接入时这些属性会被忽略，
+      #  由下一步 apksigner 完成实际签名；将来 kts 接入后此 -D 即生效）。
+      # 正式发布前换成 GitHub Secrets 里的用户 keystore：
+      #   -Drelease.keystore.password="${{ secrets.KEYSTORE_PASS }}" 等。
       run: |
         chmod +x gradlew
-        ./gradlew clean assembleRelease --stacktrace
+        ./gradlew clean assembleRelease --stacktrace \
+          -Drelease.keystore.path="$GITHUB_WORKSPACE/beta-release.keystore" \
+          -Drelease.keystore.password="$(cat ks.pass)" \
+          -Drelease.key.alias="modbox" \
+          -Drelease.key.password="$(cat key.pass)"
 
-    - name: Rename APK
+    - name: Sign APK with apksigner (v1 + v2)
+      # app 模块 release 尚未在 gradle 里配置 signingConfigs，
+      # 产物是 unsigned APK；这里用 beta 临时 keystore 直接签名。
       run: |
-        VERSION=${GITHUB_REF_NAME#v}
+        APKSIGNER="$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)"
+        UNSIGNED=app/build/outputs/apk/release/app-release-unsigned.apk
+        TESTED=app/build/outputs/apk/release/app-release.apk
+        # 若将来 gradle 侧已签名（app-release.apk 存在），直接用它
+        if [ -f "$TESTED" ] && [ ! -f "$UNSIGNED" ]; then
+          cp "$TESTED" dist-unsigned.apk
+        else
+          cp "$UNSIGNED" dist-unsigned.apk
+          "$APKSIGNER" sign \
+            --ks beta-release.keystore \
+            --ks-pass file:ks.pass \
+            --ks-key-alias modbox \
+            --key-pass file:key.pass \
+            --out dist-unsigned-signed.apk \
+            dist-unsigned.apk
+          mv dist-unsigned-signed.apk dist-unsigned.apk
+        fi
+        "$APKSIGNER" verify --print-certs dist-unsigned.apk
+
+    - name: Rename APK and generate sha256sums.txt
+      run: |
+        TAG="${GITHUB_REF_NAME#v}"
+        DATE="$(date -u +%Y%m%d)"
+        OUT="dist/modbox-${TAG}-${DATE}-arm64-v8a.apk"
         mkdir -p dist
-        cp app/build/outputs/apk/release/app-release-unsigned.apk \
-           "dist/modrinth-android-v${VERSION}-release.apk"
-        sha256sum "dist/modrinth-android-v${VERSION}-release.apk" \
-           > "dist/modrinth-android-v${VERSION}-release.apk.sha256"
+        cp dist-unsigned.apk "$OUT"
+        rm -f dist-unsigned.apk
+        (cd dist && sha256sum "$(basename "$OUT")" > sha256sums.txt)
+        cat dist/sha256sums.txt
+        echo "APK_SHA256=$(awk '{print $1}' dist/sha256sums.txt)" >> "$GITHUB_ENV"
+        echo "APK_NAME=$(basename "$OUT")" >> "$GITHUB_ENV"
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
         files: |
-          dist/*.apk
-          dist/*.sha256
+          dist/modbox-*-arm64-v8a.apk
+          dist/sha256sums.txt
         draft: false
         prerelease: true
         generate_release_notes: true
+        body: |
+          ## ModBox ${{ env.APK_NAME }}
+
+          - 架构：**仅 arm64-v8a**（单架构 APK，不支持 32 位 / x86 设备）
+          - SHA-256：`${{ env.APK_SHA256 }}`
+          - 校验：`sha256sum -c sha256sums.txt`
+
+          ### 安装说明
+          本 APK 未上架应用商店，安装前请在手机「设置 → 安全」中
+          允许**安装未知来源应用**（针对下载器应用授权），否则无法安装。
+
+          > 本版本为 beta 阶段构建，使用 CI 临时签名；
+          > 如已安装上一 beta 版本，请先卸载再安装（签名不同会冲突）。

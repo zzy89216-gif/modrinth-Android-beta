@@ -21,6 +21,8 @@ jobs:
         cache: 'gradle'
 
     - name: Compile check
+      # KSP 迁移后任务名不变：KSP 只插入 kspDebugKotlin 作为前置依赖，
+      # compileDebugKotlin 仍会连带触发 KSP 处理
       run: |
         chmod +x gradlew
         ./gradlew compileDebugKotlin --stacktrace
