@@ -32,7 +32,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.GetApp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -263,7 +263,7 @@ private fun VersionRow(version: Version, onDownload: () -> Unit) {
                         containerColor = MaterialTheme.colorScheme.primary
                     )
                 ) {
-                    Icon(Icons.Filled.Download, contentDescription = null)
+                    Icon(Icons.Filled.GetApp, contentDescription = null)
                     Spacer(Modifier.width(6.dp))
                     Text("下载")
                 }

@@ -127,7 +127,7 @@ class DownloadService @Inject constructor(
 
     override fun onDestroy() {
         scope.cancel()
-        client?.dispatcher.executorService.shutdown()
+        client?.dispatcher?.executorService.shutdown()
         super.onDestroy()
     }
 
@@ -318,7 +318,10 @@ class DownloadService @Inject constructor(
                 if (resumed) {
                     RandomAccessFile(part, "rw").use { raf ->
                         raf.seek(raf.length())
-                        stream(body, raf, item, downloaded, digest, total)
+                        // RandomAccessFile 本身不是 OutputStream 子类，包一层 DataOutputStream
+                        java.io.DataOutputStream(raf).use { out ->
+                            stream(body, out, item, downloaded, digest, total)
+                        }
                     }
                 } else {
                     FileOutputStream(part).use { out ->

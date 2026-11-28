@@ -1,4 +1,9 @@
-// Ported from ZalithLauncher2 (GPL-3.0), see NOTICE
+/*
+ * Part of ModBox. New code that consumes the ZalithLauncher2-ported keymap
+ * modules (see NOTICE). Project files are under the repository LICENSE.
+ */
+
+
 
 package com.modrinth.android.keymap
 

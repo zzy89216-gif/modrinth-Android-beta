@@ -1,21 +1,50 @@
-MIT License
+# 许可 / Licensing
 
-Copyright (c) 2026 zzy
+ModBox（仓库 modrinth-Android-beta）包含两部分代码，**按文件边界适用不同许可**：
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+## 1. ModBox 自身代码 — GNU GPL v3.0 or later
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+本仓库中**未标注**「Ported from ZalithLauncher2」的 ModBox 自身代码
+（UI、数据层、领域层、账户、下载管理器等），因与 GPL 组件在同一个可执行应用
+（APK）中链接分发，**整体按 GPL-3.0 or later 分发**（完整文本见 `COPYING`，
+或 https://www.gnu.org/licenses/gpl-3.0.txt）。
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+> 说明：早期版本曾标注「ModBox 自身代码 MIT」。由于本应用链接了 GPL-3.0 的
+> ZalithLauncher2 移植模块（键位 / CardGrid / ColorPicker，见 NOTICE），
+> 按 GPLv3 的链接规则，整个可分发单元应按 GPL 分发。为消除歧义，
+> 统一改为整体 GPL-3.0 or later。
+
+```
+Copyright (C) 2026 zzy
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+```
+
+## 2. 移植自 Zalith Launcher 2 的文件 — GPL-3.0 or later（保留原版权）
+
+标注 `Ported from ZalithLauncher2 (GPL-3.0), see NOTICE` 的文件是
+Zalith Launcher 2（Copyright (C) 2025-2026 MovTery 及贡献者）的修改版衍生作品，
+按其源许可 **GPL-3.0 or later** 分发，原版权声明与修改声明保留在每个文件头。
+源文件对应关系与完整清单见根目录 [`NOTICE`](NOTICE)。
+
+## 3. 第三方依赖
+
+Retrofit / OkHttp / Gson / Coil / Room / DataStore / Hilt / Compose 等
+以各自许可分发（Apache-2.0 为主），见 `gradle/libs.versions.toml`。
+
+## 4. 品牌声明（重要）
+
+本应用**不使用** Modrinth 官方 logo、名称或品牌配色。
+「Modrinth」是 Rinth, Inc. 的注册商标；本应用是独立第三方客户端，
+仅通过其公开 REST API 交互。品牌合规依据见 [`docs/许可证调研.md`](docs/许可证调研.md)。

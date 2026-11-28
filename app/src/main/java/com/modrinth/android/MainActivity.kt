@@ -13,7 +13,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
-import androidx.navigation.compose.rememberNavController
 import com.modrinth.android.ui.navigation.AppNavGraph
 import com.modrinth.android.ui.theme.ModBoxTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -35,8 +34,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val navController = rememberNavController()
-                    AppNavGraph(navController = navController)
+                    AppNavGraph()
                 }
             }
         }

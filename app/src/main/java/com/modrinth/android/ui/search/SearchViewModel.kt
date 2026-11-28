@@ -82,7 +82,7 @@ class SearchViewModel @Inject constructor(
         val offset = p.items.size
         viewModelScope.launch {
             try {
-                val result = searchProjects.execute(s.query.trim(), offset, PAGE_SIZE)
+                val result = searchProjects.executePaged(s.query.trim(), offset, PAGE_SIZE)
                 _state.update { st ->
                     val cur = st.phase as? SearchPhase.Done ?: st.phase
                     st.copy(
@@ -105,7 +105,7 @@ class SearchViewModel @Inject constructor(
         if (q.isBlank()) return
         _state.update { it.copy(phase = SearchPhase.Loading) }
         try {
-            val result = searchProjects.execute(q, 0, PAGE_SIZE)
+            val result = searchProjects.executePaged(q, 0, PAGE_SIZE)
             total = result.total
             _state.update {
                 it.copy(phase = SearchPhase.Done(result.hits, result.total, result.hasMore()))

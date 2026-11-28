@@ -61,7 +61,7 @@ fun HomeScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Modrinth",
+                        text = "ModBox",
                         style = MaterialTheme.typography.titleLarge
                     )
                 },

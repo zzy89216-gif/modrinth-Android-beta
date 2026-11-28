@@ -34,7 +34,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -72,10 +71,12 @@ fun MineScreen(viewModel: MineViewModel = hiltViewModel()) {
                 onLogin = viewModel::onLogin
             )
         } else {
+            // 委托属性（by collectAsStateWithLifecycle）不能 smart-cast，先取本地副本
+            val acc = account!!
             AccountPanel(
-                avatarColor = account.avatarColor,
-                displayName = account.displayName,
-                username = account.username,
+                avatarColor = acc.avatarColor,
+                displayName = acc.displayName,
+                username = acc.username,
                 favorites = state.favorites,
                 loadingFavorites = state.loadingFavorites,
                 onLogout = viewModel::onLogout,
@@ -190,7 +191,7 @@ private fun AccountPanel(
                     Modifier
                         .size(56.dp)
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Color(avatarColor.toArgb()))
+                        .background(Color(avatarColor))
                 ) {
                     Text(
                         text = displayName.take(1).uppercase(),

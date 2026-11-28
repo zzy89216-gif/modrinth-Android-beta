@@ -2,8 +2,10 @@ package com.modrinth.android.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// 品牌色：Modrinth 官方绿（深色优先）
-val ModboxPrimary = Color(0xFF00AF5E)
+// ModBox 品牌色（深色优先）。
+// 注意：不要用 Modrinth 官方绿 #00AF5E——品牌元素（含配色/造型）属 Rinth, Inc. 保留资产，
+// 见 docs/许可证调研.md（未获书面许可前禁止使用）。
+val ModboxPrimary = Color(0xFF6C5CE7)
 val ModboxPrimaryContainer = Color(0xFF3A3270)
 val ModboxOnPrimary = Color(0xFFFFFFFF)
 val ModboxBackground = Color(0xFF0F1115)

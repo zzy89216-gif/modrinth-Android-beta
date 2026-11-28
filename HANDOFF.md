@@ -78,10 +78,23 @@
 8. **渲染 / 保活落地**（调研依据 `docs/保活与渲染调研.md`）：Coil 全局 loader 由 Hilt 单例提供
    （memoryCache 50MB / diskCache 128MB / crossfade 200ms；coil-compose 2.7.0 无 singleton
    自动发现，`AsyncImage` 必须显式传 `imageLoader`）；`ProjectCard` 固定行高 76dp 列表卡片。
-9. **UI 重构（完成）**：底部导航三 tab（首页 / 分类 / 我的）+ 搜索 + 项目详情 + 我的页；深色主题。
-   品牌按用户决定改为 **Modrinth 官方绿 `#00AF5E`**，app_name = **「modrinth APP」**，启动图标重做为
-   官方风格绿环 + 扳手矢量（`drawable/ic_launcher_foreground.xml`）。⚠️ 用官方 logo/名称的许可证
-   合规调研由 license-agent 进行中（产出 `docs/许可证调研.md`），**明天先读该文档再决定是否回退品牌**。
+9. **UI 重构（完成）**：底部导航三 tab（首页 / 分类 / 我的）+ 搜索 + 项目详情 + 我的页；深色主题
+   （品牌紫 `#6C5CE7`）。
+12. **品牌合规裁决（license-agent，`docs/许可证调研.md`，16 条证据 URL）**：
+    - 用户曾要求用官方 logo + 名字「modrinth APP」；调研结论是**成文禁止**（Rinth, Inc.
+      COPYING.md：品牌元素未经书面许可严禁使用，All rights reserved；且官方已有同名产品
+      「Modrinth App」），**当晚已全部回退**：app_name = `ModBox`、图标 = 自绘原创等距立方体、
+      颜色 = `#6C5CE7`。商店描述可用「Modrinth 客户端（非官方）」这类描述性表述（nominative fair use）。
+    - 想要官方观感的唯一合法路径：向 Rinth, Inc. 申请书面品牌许可，拿到前不动。
+    - ⚠️ 遗留（上 Play 前必须做）：`applicationId = "com.modrinth.android"` 也含商标，
+      建议改 `com.modbox.app`（改 id 要赶在 Play 首发前；只改 `app/build.gradle.kts` 一行，
+      R 类引用不受影响）。
+13. **GPL 合规修复（对应 license-agent 指出的 3 个缺口，当晚完成）**：
+    - 27 个移植文件头统一补「Copyright (C) 2025-2026 MovTery + GPLv3 §4 修改声明」（3 个
+      zl2-agent 自写文件 KeymapRepository/Screen/ViewModel 标注为 ModBox 自身代码，不误标）；
+    - `GlKeycodes.kt` 恢复完整 GLFW/zlib 许可全文（zlib 条款 3 要求不得移除）；
+    - 根 `LICENSE` 重写为双许可说明（自身代码因链接 GPL 组件整体按 GPL-3.0+ 分发，
+      早期「MIT 仅约束 ModBox 自身代码」写法已废弃）；新增 `COPYING`（GPLv3 全文 673 行）。
 10. **文档体系重写**：README / HANDOFF / CHANGELOG / PROJECT_PLAN / API_REFERENCE /
     TECHNICAL_DOC / CONTRIBUTING 全部对齐上述新现实；根目录新增 `NOTICE`（GPL 移植清单）。
 11. **CI 踩坑全部扫清**：云端构建推进到 KSP 阶段，详见「三」。
@@ -185,14 +198,30 @@ curl -sL -H "Authorization: token $TOKEN" \
 
 ## 五、明日执行清单（按顺序，今天到此为止）
 
-### 第 0 步：看今晚 CI（预计 10 分钟）
+### 第 0 步：修掉剩余编译错误让 CI 变绿
 
-1. 读 `docs/许可证调研.md`（license-agent 产出；若还没产出，问它的汇报消息）
-2. 查今晚推送触发的 CI run：按「三」末尾的快捷命令拉日志
-   - 红：按 R2 清单修 app 模块 Compose 错误 → 推送 → 再查
-   - 绿：直接进第 1 步
-3. **R1 确认**：`curl -sI "https://api.modrinth.com/v1/search?query=optifine&limit=1"` 看状态码；
-   410 则改 `DataModule.kt` 的 baseUrl 为 `/v2/`，推送
+**背景**：c33b3ae 的 CI 红（41 条编译错误）。**当晚已修其中约 15 条机械错误**（已在工作区，
+若尚未提交则先 `git add -A && git commit` 推送）：MainActivity 参数、MineScreen smart-cast、
+Home/Search ViewModel 的 `executePaged` 调用、ProjectDetailScreen 图标、DownloadService 两处
+（dispatcher 空安全 + RandomAccessFile 包 DataOutputStream）。
+
+**剩余错误（c33b3ae 日志，全部在 keymap 3 文件 + 零散，按此清单修）**：
+
+| 文件:行 | 错误 | 修法 |
+|---|---|---|
+| `keymap/GlKeyNames.kt:21` | `Char()` 构造器私有 | 查该行（应是 `'?'` 类字面量写法问题），用 `toCharArray()`/字符串下标 |
+| `keymap/KeymapRepository.kt:97` | `File` 传给期望 `Boolean` 的条件 | 该行应是 `if (file.exists())` 写成了 `if (file)` 类笔误，看上下文修条件 |
+| `keymap/KeymapScreen.kt:111-123` | 非 @Composable 上下文里调 Composable + `onClick` 参数名错 | 把列表 item 内容挪进 `@Composable` lambda；`Modifier.clickable {}` 不是 `.onClick` |
+| `keymap/KeymapScreen.kt:203-219` | `focusProperties` 不存在；把 Compose `KeyEvent` 传给 `android.view.KeyEvent` API（`type`/`Down`/`repeatCount`/`keyCode`） | zl2-agent 混淆了 Compose `KeyEvent`（只有 `type`/`key`/`isRepeat`）与 android KeyEvent。**重构**：捕获用 `Modifier.onPreviewKeyEvent(event: androidx.compose.ui.input.key.KeyEvent)`，`event.isConsumed`/`event.type == KeyEventType.Down`/`event.key`，映射用 `AndroidKeyMapper`（确认其入参是 `android.view.KeyEvent` 还是 Compose 的，必要时加 `onKeyEvent`（android.view 版）或自己桥接） |
+| `keymap/KeymapScreen.kt:74,82` | FilterChip 等实验性 API | 文件头已有 @file:OptIn？没有就加 `@file:OptIn(ExperimentalMaterial3Api::class)` |
+
+修完推送 → 看 CI 变绿 → 进第 1 步。**R1 确认**（可与修错并行）：
+`curl -sI "https://api.modrinth.com/v1/search?query=optifine&limit=1"` 看状态码；
+410 则改 `data/.../di/DataModule.kt` 的 baseUrl 为 `https://api.modrinth.com/v2/`（一行）。
+
+> 备注：brand-agent 的原始紫色立方体图标被「官方绿环扳手」覆盖过，**回退时已重写为新的
+> 原创立方体图标**（`ic_launcher_foreground.xml`，注释已声明不得仿官方造型）；
+> `docs/许可证调研.md` 是品牌/许可的最终裁决依据，16 条证据 URL 全在文内。
 
 ### 第 1 步：真机安装验证（CI 绿后）
 

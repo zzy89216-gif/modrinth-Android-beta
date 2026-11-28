@@ -44,7 +44,7 @@ class HomeViewModel @Inject constructor(
         _state.update { it.copy(loading = true, error = null) }
         viewModelScope.launch {
             try {
-                val result: SearchResult = searchProjects.execute("", limit = 15)
+                val result: SearchResult = searchProjects.executePaged("", limit = 15)
                 _state.update {
                     it.copy(
                         loading = false,
@@ -64,7 +64,7 @@ class HomeViewModel @Inject constructor(
         _state.update { it.copy(refreshing = true, error = null) }
         viewModelScope.launch {
             try {
-                val result = searchProjects.execute("", limit = 15)
+                val result = searchProjects.executePaged("", limit = 15)
                 _state.update {
                     it.copy(refreshing = false, projects = result.hits, total = result.total)
                 }
